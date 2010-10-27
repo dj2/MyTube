@@ -2,10 +2,11 @@
 #import <Quartz/Quartz.h>
 
 @implementation MyTubeIKBrowserItem
-- (id)initVideo:(GDataEntryYouTubeVideo *)theVideo image:(NSImage *)theImage
+- (id)initVideo:(GDataEntryYouTubeVideo *)theVideo
+          image:(NSImage *)theImage
 {
     if (self = [super init])
-	{
+    {
         image = [theImage copy];
         video = [theVideo copy];
     }
@@ -16,7 +17,7 @@
 {
     return video;
 }
-    
+
 - (NSString *)imageUID
 {
     return [[[[video title] stringValue] lastPathComponent] copy];
@@ -43,5 +44,6 @@
     [image release];
     [super dealloc];
 }
-    
+
 @end
+

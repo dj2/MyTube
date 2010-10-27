@@ -8,7 +8,7 @@
     IBOutlet NSTextField *search_box;
     IBOutlet IKImageBrowserView *browser;
     IBOutlet WebView *web;
-    
+
     NSMutableArray *imageList;
 }
 
