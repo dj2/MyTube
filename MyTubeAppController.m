@@ -41,10 +41,9 @@
         GDataQueryYouTube *query = [GDataQueryYouTube youTubeQueryWithFeedURL:feedURL];
         [query setVideoQuery:searchString];
 
-        ticket = [service fetchYouTubeQuery:query 
-                                   delegate:self
-                          didFinishSelector:@selector(entryListFetchTicket:finishedWithFeed:)
-                            didFailSelector:@selector(entryListFetchTicket:failedWithError:)];
+		ticket = [service fetchFeedWithQuery:query
+									delegate:self
+						   didFinishSelector:@selector(entryListFetchTicket:finishedWithFeed:error:)];
     }
     else
     {
@@ -53,34 +52,41 @@
         feedName = [feedName stringByReplacingOccurrencesOfString:@" " withString:@"_"];
     
         NSURL *feedURL = [GDataServiceGoogleYouTube youTubeURLForFeedID:feedName];
-        ticket = [service fetchYouTubeFeedWithURL:feedURL
-                                         delegate:self
-                                didFinishSelector:@selector(entryListFetchTicket:finishedWithFeed:)
-                                  didFailSelector:@selector(entryListFetchTicket:failedWithError:)];                        
+
+        ticket = [service fetchFeedWithURL:feedURL
+								  delegate:self
+						 didFinishSelector:@selector(entryListFetchTicket:finishedWithFeed:error:)];
     }
     
     [imageList removeAllObjects];
 }
 
 /* these two functions are for handling the response from fetching a feed */
-- (void)entryListFetchTicket:(GDataServiceTicket *)ticket finishedWithFeed:(GDataFeedBase *)feed
+- (void)entryListFetchTicket:(GDataServiceTicket *)ticket finishedWithFeed:(GDataFeedBase *)feed error:(NSError *)error
 {
-    GDataFeedYouTubeVideo *vfeed = (GDataFeedYouTubeVideo *)feed;
-    int i;
-    
-    for (i = 0; i < [[vfeed entries] count]; i++)
+	if (error == nil)
 	{
-        GDataEntryBase *entry = [[vfeed entries] objectAtIndex:i];
-        if (![entry respondsToSelector:@selector(mediaGroup)]) continue;
-        
-        GDataEntryYouTubeVideo *video = (GDataEntryYouTubeVideo *)entry;
-        
-        NSArray *thumbnails = [[video mediaGroup] mediaThumbnails];
-        if ([thumbnails count] == 0) continue;
-    
-        NSString *imageURLString = [[thumbnails objectAtIndex:0] URLString];
-        [self fetchEntryImageURLString:imageURLString withVideo:video];
-    }
+		GDataFeedYouTubeVideo *vfeed = (GDataFeedYouTubeVideo *)feed;
+		int i;
+		
+		for (i = 0; i < [[vfeed entries] count]; i++)
+		{
+			GDataEntryBase *entry = [[vfeed entries] objectAtIndex:i];
+			if (![entry respondsToSelector:@selector(mediaGroup)]) continue;
+			
+			GDataEntryYouTubeVideo *video = (GDataEntryYouTubeVideo *)entry;
+			
+			NSArray *thumbnails = [[video mediaGroup] mediaThumbnails];
+			if ([thumbnails count] == 0) continue;
+			
+			NSString *imageURLString = [[thumbnails objectAtIndex:0] URLString];
+			[self fetchEntryImageURLString:imageURLString withVideo:video];
+		}
+	}
+	else {
+		NSLog(@"fetch error: %@", error);
+	}
+
 }
 
 - (void)entryListFetchTicket:(GDataServiceTicket *)ticket failedWithError:(NSError *)error
